@@ -1,0 +1,74 @@
+Linear Regression Model
+
+Call the data model library and retrieve the ames data from the data model library
+```{r}
+library(modeldata)
+data <- data.frame(ames)
+```
+
+Create a simple linear regression model with for or while
+```{r}
+X <- setdiff(names(data), "Sale_Price")
+Y <- data.frame(Variable = character(), R2 = numeric(), stringsAsFactors = FALSE)
+for (var in X) {
+  formula <- as.formula(paste("Sale_Price ~", var))
+  tryCatch({
+    model <- lm(formula, data = ames)
+    r2 <- summary(model)$adj.r.squared
+  }, error = function(e) {
+    r2 <- NA
+  })
+  Y <- rbind(Y, data.frame(Variable = var, R2 = r2))
+}
+Y
+```
+
+Selection of the best model with Adjusted R2
+```{r}
+BestModel <- Y[which.max(Y$R2), ]
+BestModel
+```
+
+Create a simple linear regression model using lapply
+```{r}
+data(ames)
+X <- setdiff(names(ames), "Sale_Price")
+Y <- lapply(X, function(X) {
+  tryCatch({
+    model <- lm(Sale_Price ~ ., data = ames[, c("Sale_Price", X)])
+    r2 <- summary(model)$adj.r.squared
+  }, error = function(e) {
+    r2 <- NA
+  })
+  data.frame(X = X, r2 = r2)
+})
+Y <- do.call(rbind, Y)
+Y
+```
+
+Create matrix multiplication with commands %>%
+```{r}
+matrix1 <- matrix(1:25, nrow = 5, ncol = 5)
+matrix2 <- matrix(25:1, nrow = 5, ncol = 5)
+Y_r <- matrix1 %*% matrix2
+Y_r
+```
+
+Create matrix multiplication with the For function
+```{r}
+Y <- matrix(0, nrow = 5, ncol = 5)
+for (i in 1:5) {
+  for (j in 1:5) {
+    for (k in 1:5) {
+      Y[i, j] <- Y[i, j] + matrix1[i, k] * matrix2[k, j]
+    }
+  }
+}
+Y
+```
+
+Identifikasi apakah model Y sama dengan model Y_r
+```{r}
+identical(Y, Y_r)
+```
+
